@@ -85,6 +85,8 @@ const formatCurrency = (amount: number, method: string): string => {
     }
 };
 
+const usdToVndRate = 25000;
+
 const formatDate = (dateString: string) => {
     if (!dateString) return "-";
     return new Date(dateString).toLocaleDateString("vi-VN", {
@@ -149,13 +151,21 @@ const AllOrdersPage: React.FC = () => {
     // Calculate statistics for filtered orders
     const statistics = useMemo(() => {
         const totalOrders = filteredOrders.length;
+
         const processingOrders = filteredOrders.filter(
             (o) => o.status === "PENDING" || o.status === "PROCESSING"
         ).length;
+
         const deliveredOrders = filteredOrders.filter((o) => o.status === "DELIVERED").length;
+
         const totalRevenue = filteredOrders
             .filter((o) => o.status === "DELIVERED")
-            .reduce((sum, o) => sum + o.totalPrice, 0);
+            .reduce((sum, o) => {
+                if (o.payment?.method?.toLowerCase() === "paypal") {
+                    return sum + o.totalPrice * usdToVndRate;
+                }
+                return sum + o.totalPrice;
+            }, 0);
 
         return {
             totalOrders,
@@ -366,11 +376,21 @@ const AllOrdersPage: React.FC = () => {
             title: "Đơn giá",
             dataIndex: "price",
             key: "price",
-            render: (price: number, record: OrderItemDTO) => (
-                <Text strong style={{ color: "#667eea" }}>
-                    {record.paymentDTO ? formatCurrency(price, record.paymentDTO.method) : `${price.toLocaleString()}₫`}
-                </Text>
-            )
+            render: (price: number, record: OrderItemDTO) => {
+                let displayAmount = price;
+
+                if (record.paymentDTO?.method.toLowerCase() === "paypal") {
+                    displayAmount = price / usdToVndRate;
+                }
+
+                return (
+                    <Text strong style={{ color: "#667eea" }}>
+                        {record.paymentDTO
+                            ? formatCurrency(displayAmount, record.paymentDTO.method)
+                            : `${price.toLocaleString()}₫`}
+                    </Text>
+                );
+            }
         }
     ];
 
@@ -974,10 +994,18 @@ const AllOrdersPage: React.FC = () => {
                                         <Text strong style={{ fontSize: 16 }}>
                                             Tổng cộng:{" "}
                                             <Text style={{ color: "#667eea", fontSize: 18 }}>
-                                                {selectedOrderItems
-                                                    .reduce((sum, item) => sum + item.price * item.quantity, 0)
-                                                    .toLocaleString()}
-                                                ₫
+                                                {selectedOrderItems.length > 0 &&
+                                                selectedOrderItems[0].paymentDTO?.method.toLowerCase() === "paypal"
+                                                    ? formatCurrency(
+                                                          selectedOrderItems.reduce(
+                                                              (sum, item) => sum + item.price * item.quantity,
+                                                              0
+                                                          ) / usdToVndRate,
+                                                          "paypal"
+                                                      )
+                                                    : `${selectedOrderItems
+                                                          .reduce((sum, item) => sum + item.price * item.quantity, 0)
+                                                          .toLocaleString()}₫`}
                                             </Text>
                                         </Text>
                                     </div>

@@ -48,6 +48,8 @@ const formatCurrency = (amount: number, method: string): string => {
     }
 };
 
+const usdToVndRate = 25000;
+
 const UserOrdersPage: React.FC = () => {
     const [orders, setOrders] = useState<OrderDTO[]>([]);
     const [loading, setLoading] = useState<boolean>(true);
@@ -101,9 +103,15 @@ const UserOrdersPage: React.FC = () => {
             (o) => o.status === "PENDING" || o.status === "PROCESSING"
         ).length;
         const deliveredOrders = filteredOrders.filter((o) => o.status === "DELIVERED").length;
+
         const totalSpent = filteredOrders
             .filter((o) => o.status === "DELIVERED")
-            .reduce((sum, o) => sum + o.totalPrice, 0);
+            .reduce((sum, o) => {
+                if (o.payment?.method?.toLowerCase() === "paypal") {
+                    return sum + o.totalPrice * usdToVndRate;
+                }
+                return sum + o.totalPrice;
+            }, 0);
 
         return {
             totalOrders,
@@ -165,6 +173,21 @@ const UserOrdersPage: React.FC = () => {
                 return "Đã giao hàng";
             case "CANCELED":
                 return "Đã hủy";
+            case "FAILED":
+                return "Thất bại";
+            case "REFUNDED":
+                return "Đã hoàn tiền";
+            default:
+                return status;
+        }
+    };
+
+    const getPaymentStatusText = (status: string) => {
+        switch (status.toUpperCase()) {
+            case "PENDING":
+                return "Chờ xử lý";
+            case "COMPLETED":
+                return "Hoàn thành";
             case "FAILED":
                 return "Thất bại";
             case "REFUNDED":
@@ -662,7 +685,7 @@ const UserOrdersPage: React.FC = () => {
                                             }
                                             style={{ fontWeight: 500 }}
                                         >
-                                            {selectedOrderItems[0].paymentDTO.status}
+                                            {getPaymentStatusText(selectedOrderItems[0].paymentDTO.status || "")}
                                         </Tag>
                                     </Col>
                                     <Col span={8}>
@@ -712,12 +735,28 @@ const UserOrdersPage: React.FC = () => {
                                         }}
                                     >
                                         <Text strong style={{ fontSize: 16 }}>
-                                            Tổng cộng:{" "}
+                                            Tổng cộng:
                                             <Text style={{ color: "#667eea", fontSize: 18 }}>
-                                                {selectedOrderItems
-                                                    .reduce((sum, item) => sum + item.price * item.quantity, 0)
-                                                    .toLocaleString()}
-                                                ₫
+                                                {selectedOrderItems.length > 0 && selectedOrderItems[0].paymentDTO
+                                                    ? selectedOrderItems[0].paymentDTO.method.toLowerCase() === "paypal"
+                                                        ? formatCurrency(
+                                                              selectedOrderItems.reduce(
+                                                                  (sum, item) =>
+                                                                      sum + (item.price / usdToVndRate) * item.quantity,
+                                                                  0
+                                                              ),
+                                                              "paypal"
+                                                          )
+                                                        : formatCurrency(
+                                                              selectedOrderItems.reduce(
+                                                                  (sum, item) => sum + item.price * item.quantity,
+                                                                  0
+                                                              ),
+                                                              "vnd"
+                                                          )
+                                                    : `${selectedOrderItems
+                                                          .reduce((sum, item) => sum + item.price * item.quantity, 0)
+                                                          .toLocaleString()}₫`}
                                             </Text>
                                         </Text>
                                     </div>
