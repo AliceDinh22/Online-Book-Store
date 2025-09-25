@@ -28,14 +28,17 @@ const App = () => {
             <Route path="/activate/:code" element={<ActivateAccount />} />
             <Route path="/forgot-password" element={<ResetPasswordRequest />} />
             <Route path="/reset/:code" element={<ResetPassword />} />
-            <Route path="/profile" element={<Profile />} />
             <Route path="/books/:id" element={<BookDetail />} />
-            <Route path="/checkout" element={<Checkout />} />
-            <Route path="*" element={<Navigate to="/dashboard" replace />} />
             <Route path="/paypal/result" element={<PayPalResult />} />
-            <Route path="/my-orders" element={<UserOrdersPage />} />
+
+            <Route path="/profile" element={token ? <Profile /> : <Navigate to="/login" replace />} />
+            <Route path="/checkout" element={token ? <Checkout /> : <Navigate to="/login" replace />} />
+            <Route path="/my-orders" element={token ? <UserOrdersPage /> : <Navigate to="/login" replace />} />
+
             {(role === "ADMIN" || role === "STAFF") && <Route path="/orders" element={<AllOrdersPage />} />}
             {role === "ADMIN" && <Route path="/admin/*" element={<AdminPage />} />}
+
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
     );
 };
