@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Button, Drawer, Badge, Divider, Empty, Typography } from "antd";
+import { Button, Drawer, Badge, Divider, Empty, Typography, message } from "antd";
 import { ShoppingCartOutlined } from "@ant-design/icons";
 import { CartListProps } from "../types/types";
 import CartItemCard from "./CartItemCard";
@@ -9,6 +9,7 @@ const { Title } = Typography;
 const CartList: React.FC<CartListProps> = ({ cart, userId, onUpdate, onRemove }) => {
     const [drawerVisible, setDrawerVisible] = useState(false);
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
+    const [messageApi, contextHolder] = message.useMessage();
     const navigate = useNavigate();
 
     const handleSelectItem = (id: number, isChecked: boolean) => {
@@ -16,18 +17,18 @@ const CartList: React.FC<CartListProps> = ({ cart, userId, onUpdate, onRemove })
     };
 
     const selectedTotalPrice = cart
-    .filter((item) => selectedItems.includes(item.book.id))
-    .reduce((sum, item) => {
-        const unitPrice =
-            item.book.discountPrice && item.book.discountPrice < item.book.originalPrice
-                ? item.book.discountPrice
-                : item.book.originalPrice;
-        return sum + unitPrice * item.quantity;
-    }, 0);
-
+        .filter((item) => selectedItems.includes(item.book.id))
+        .reduce((sum, item) => {
+            const unitPrice =
+                item.book.discountPrice && item.book.discountPrice < item.book.originalPrice
+                    ? item.book.discountPrice
+                    : item.book.originalPrice;
+            return sum + unitPrice * item.quantity;
+        }, 0);
 
     return (
         <>
+            {contextHolder}
             <Button
                 type="primary"
                 shape="circle"
@@ -83,16 +84,20 @@ const CartList: React.FC<CartListProps> = ({ cart, userId, onUpdate, onRemove })
                             <Button
                                 type="primary"
                                 size="large"
-                                disabled={selectedItems.length === 0}  
-                                onClick={() =>
+                                disabled={selectedItems.length === 0}
+                                onClick={() => {
+                                    if (!userId) {
+                                        messageApi.error("Vui lòng đăng nhập để thanh toán!");
+                                        return;
+                                    }
                                     navigate("/checkout", {
                                         state: {
                                             cart: cart.filter((item) => selectedItems.includes(item.book.id)),
                                             totalPrice: selectedTotalPrice,
                                             userId
                                         }
-                                    })
-                                }
+                                    });
+                                }}
                                 style={{
                                     background: "linear-gradient(135deg, #667eea, #764ba2)",
                                     border: "none",

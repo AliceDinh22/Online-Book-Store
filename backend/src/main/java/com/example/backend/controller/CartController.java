@@ -1,11 +1,14 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.CartDTO;
+import com.example.backend.dto.CartItemDTO;
 import com.example.backend.dto.ResponseDTO;
 import com.example.backend.entity.Cart;
 import com.example.backend.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -41,6 +44,16 @@ public class CartController {
                 .data(cartService.updateBookQuantity(userId, bookId, newQuantity))
                 .status(200)
                 .message("Cập nhật số lượng thành công")
+                .build();
+    }
+
+    @PostMapping("/merge")
+    public ResponseDTO<CartDTO> mergeCart(@RequestParam Long userId, @RequestBody List<CartItemDTO> guestItems) {
+        CartDTO mergedCart = cartService.mergeCart(userId, guestItems);
+        return ResponseDTO.<CartDTO>builder()
+                .data(mergedCart)
+                .status(200)
+                .message("Merge giỏ hàng thành công")
                 .build();
     }
 

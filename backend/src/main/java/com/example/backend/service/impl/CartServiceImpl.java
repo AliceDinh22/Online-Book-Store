@@ -103,6 +103,38 @@ public class CartServiceImpl implements CartService {
 
     @Override
     @Transactional
+    public CartDTO mergeCart(Long userId, List<CartItemDTO> guestItems) {
+        Cart cart = cartRepository.findByUserId(userId)
+                .orElseGet(() -> createCartForUser(userId));
+
+        for (CartItemDTO guestItem : guestItems) {
+            Long bookId = guestItem.getBook().getId();
+            int quantity = guestItem.getQuantity();
+
+            Book book = bookRepository.findById(bookId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy sách"));
+
+            CartItem item = cartItemRepository.findByCartAndBook(cart, book)
+                    .orElse(new CartItem());
+
+            int currentQty = item.getId() == null ? 0 : item.getQuantity();
+            int newQty = Math.min(currentQty + quantity, book.getStock());
+
+            if (item.getId() == null) {
+                item.setCart(cart);
+                item.setBook(book);
+            }
+            item.setQuantity(newQty);
+            cartItemRepository.save(item);
+        }
+
+        cart.setUpdatedAt(LocalDateTime.now());
+        return mapToDTO(cart);
+    }
+
+
+    @Override
+    @Transactional
     public CartDTO removeBook(Long userId, Long bookId) {
         Cart cart = cartRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy giỏ hàng"));

@@ -1,7 +1,10 @@
 package com.example.backend.service;
 
 import com.example.backend.dto.CartDTO;
+import com.example.backend.dto.CartItemDTO;
 import com.example.backend.entity.Cart;
+
+import java.util.List;
 
 public interface CartService {
     CartDTO getCart(Long userId);
@@ -13,4 +16,6 @@ public interface CartService {
     Cart createCartForUser(Long userId);
 
     CartDTO updateBookQuantity(Long userId, Long bookId, int newQuantity);
+
+    CartDTO mergeCart(Long userId, List<CartItemDTO> guestItems);
 }
