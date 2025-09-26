@@ -368,10 +368,13 @@ const UserOrdersPage: React.FC = () => {
             key: "price",
             render: (price: number, record: OrderItemDTO) => {
                 if (record.paymentDTO) {
-                    if (record.paymentDTO.method.toLowerCase() === "paypal") {
+                    const method = record.paymentDTO.method.toLowerCase();
+
+                    if (method === "paypal") {
+                        const newPrice = price / usdToVndRate; // quy đổi VND -> USD
                         return (
                             <Text strong style={{ color: "#667eea" }}>
-                                {formatCurrency(record.paymentDTO.amount, "paypal")}
+                                {formatCurrency(newPrice, "paypal")}
                             </Text>
                         );
                     } else {
