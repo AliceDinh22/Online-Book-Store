@@ -529,7 +529,14 @@ const AdminUsers: React.FC = () => {
                             <Form.Item
                                 name="password"
                                 label="Mật khẩu"
-                                rules={[{ required: true, message: "Vui lòng nhập mật khẩu" }]}
+                                rules={[
+                                    { required: true, message: "Vui lòng nhập mật khẩu!" },
+                                    {
+                                        pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                                        message:
+                                            "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!"
+                                    }
+                                ]}
                             >
                                 <Input.Password placeholder="Nhập mật khẩu" />
                             </Form.Item>

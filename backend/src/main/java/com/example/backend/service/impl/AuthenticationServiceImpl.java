@@ -38,8 +38,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final JwtProvider jwtProvider;
 
-    @Value("${hostname}")
-    private String hostname;
+    @Value("${frontendUrl}")
+    private String frontendUrl;
 
     @Value("${recaptcha.secret}")
     private String secret;
@@ -202,7 +202,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public void sendActivationEmail(User user) throws MessagingException {
         String subject = "Kích hoạt tài khoản";
-        String activationUrl = "http://" + hostname + "/activate/" + user.getActivationCode();
+        String activationUrl = frontendUrl + "/activate/" + user.getActivationCode();
 
         String htmlContent = "<h1>Xin chào " + user.getFirstName() + "</h1>"
                 + "<p>Vui lòng nhấp vào liên kết bên dưới để kích hoạt tài khoản của bạn: </p>"
@@ -214,7 +214,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     public void sendPasswordResetEmail(User user) throws MessagingException {
         String subject = "Đặt lại mật khẩu";
-        String resetUrl = "http://" + hostname + "/reset/" + user.getPasswordResetCode();
+        String resetUrl = frontendUrl + "/reset/" + user.getPasswordResetCode();
 
         String htmlContent = "<h1>Xin chào " + user.getFirstName() + "</h1>"
                 + "<p>Bạn có thể đặt lại mật khẩu bằng cách nhấp vào liên kết bên dưới:</p>"

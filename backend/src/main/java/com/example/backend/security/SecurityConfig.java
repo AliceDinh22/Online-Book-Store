@@ -35,8 +35,8 @@ public class SecurityConfig {
     private final CustomOAuth2UserService oAuth2UserService;
     private final OAuth2SuccessHandler oauthSuccessHandler;
 
-    @Value("${hostname}")
-    private String hostname;
+    @Value("${frontendUrl}")
+    private String frontendUrl;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -46,7 +46,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Collections.singletonList("http://" + hostname));
+        configuration.setAllowedOrigins(Collections.singletonList(frontendUrl));
         configuration.setAllowedMethods((List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD")));
         configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);

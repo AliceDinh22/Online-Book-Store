@@ -66,8 +66,12 @@ const ChangePassword: React.FC = () => {
                         label="Mật khẩu mới"
                         name="password"
                         rules={[
-                            { required: true, message: "Vui lòng nhập mật khẩu mới" },
-                            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" }
+                            { required: true, message: "Vui lòng nhập mật khẩu!" },
+                            {
+                                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                                message:
+                                    "Mật khẩu phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!"
+                            }
                         ]}
                     >
                         <Input.Password placeholder="Nhập mật khẩu mới" />
@@ -79,7 +83,6 @@ const ChangePassword: React.FC = () => {
                         dependencies={["password"]}
                         rules={[
                             { required: true, message: "Vui lòng xác nhận mật khẩu" },
-                            { min: 6, message: "Mật khẩu phải có ít nhất 6 ký tự" },
                             ({ getFieldValue }) => ({
                                 validator(_, value) {
                                     if (!value || getFieldValue("password") === value) {

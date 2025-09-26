@@ -20,8 +20,8 @@ import java.io.IOException;
 public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     private final JwtProvider jwtProvider;
 
-    @Value("${hostname}")
-    private String hostname;
+    @Value("${frontendUrl}")
+    private String frontendUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication)
@@ -32,7 +32,7 @@ public class OAuth2SuccessHandler extends SimpleUrlAuthenticationSuccessHandler 
 
         String token = jwtProvider.createToken(email, Role.CUSTOMER.name());
 
-        String uri= UriComponentsBuilder.fromUriString("http://" + hostname + "/oauth2/redirect")
+        String uri= UriComponentsBuilder.fromUriString(frontendUrl + "/oauth2/redirect")
                 .queryParam("token", token)
                 .build().toUriString();
 
